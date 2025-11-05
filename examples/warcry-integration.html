@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WarCry - Integration Example</title>
+</head>
+<body>
+    <!-- Your existing landing page content -->
+    
+    <!-- Add Meta Conversion Tracker -->
+    <script src="https://yourwordpresssite.com/wp-content/plugins/meta-conversion-tracker/assets/js/tracker.js"></script>
+    <script>
+        // Initialize tracker
+        const tracker = new MCTTracker({
+            apiUrl: 'https://yourwordpresssite.com/wp-json/mct/v1/track',
+            apiKey: 'YOUR_API_KEY_HERE',
+            debug: false // Set to true for testing
+        });
+        
+        console.log('Tracker initialized and data captured');
+    </script>
+    
+    <!-- Modified captcha verification function -->
+    <script>
+        // Store original verifyCaptcha function
+        const originalVerifyCaptcha = verifyCaptcha;
+        
+        // Override verifyCaptcha to include tracking
+        function verifyCaptcha() {
+            isDragging = false;
+            slider.style.left = maxPosition + 'px';
+            slider.style.cursor = 'default';
+            
+            // Show success
+            track.style.display = 'none';
+            successDiv.style.display = 'block';
+            
+            // Track conversion BEFORE redirect
+            tracker.track({
+                platform: targetPlatform.toLowerCase(), // 'discord' or 'telegram'
+                event_name: 'Lead'
+            }).then(function(response) {
+                console.log('Conversion tracked:', response);
+                
+                // Redirect after tracking
+                setTimeout(function() {
+                    window.open(targetUrl, '_blank');
+                    closeModal();
+                    
+                    // Reset for next use
+                    setTimeout(function() {
+                        track.style.display = 'block';
+                        successDiv.style.display = 'none';
+                        slider.style.left = '0px';
+                        slider.style.cursor = 'grab';
+                    }, 500);
+                }, 1500);
+            }).catch(function(error) {
+                console.error('Tracking failed:', error);
+                // Still redirect even if tracking fails
+                setTimeout(function() {
+                    window.open(targetUrl, '_blank');
+                    closeModal();
+                }, 1500);
+            });
+        }
+    </script>
+    
+    <!-- Alternative: Simple button integration -->
+    <script>
+        // Example for direct button clicks (without captcha)
+        function redirectToDiscord() {
+            tracker.trackAndRedirect('YOUR_DISCORD_URL', {
+                platform: 'discord',
+                event_name: 'Lead'
+            });
+        }
+        
+        function redirectToTelegram() {
+            tracker.trackAndRedirect('YOUR_TELEGRAM_URL', {
+                platform: 'telegram',
+                event_name: 'Lead'
+            });
+        }
+    </script>
+</body>
+</html>
