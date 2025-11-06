@@ -430,22 +430,22 @@ class MCT_API {
      */
     private function get_track_args() {
         return array(
-            'utm_source' => array('type' => 'string', 'required' => false),
-            'utm_medium' => array('type' => 'string', 'required' => false),
-            'utm_campaign' => array('type' => 'string', 'required' => false),
-            'utm_content' => array('type' => 'string', 'required' => false),
-            'utm_term' => array('type' => 'string', 'required' => false),
-            'fbclid' => array('type' => 'string', 'required' => false),
-            'fbc' => array('type' => 'string', 'required' => false),
-            'fbp' => array('type' => 'string', 'required' => false),
-            'user_agent' => array('type' => 'string', 'required' => false),
-            'fingerprint' => array('type' => 'string', 'required' => false),
-            'browser_fingerprint' => array('type' => 'object', 'required' => false),
-            'platform' => array('type' => 'string', 'required' => false),
-            'landing_page' => array('type' => 'string', 'required' => false),
-            'referrer' => array('type' => 'string', 'required' => false),
-            'event_name' => array('type' => 'string', 'required' => false, 'default' => 'Lead'),
-            'custom_data' => array('type' => 'object', 'required' => false),
+            'utm_source' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'utm_medium' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'utm_campaign' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'utm_content' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'utm_term' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'fbclid' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'fbc' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'fbp' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'user_agent' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'fingerprint' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'browser_fingerprint' => array('required' => false),
+            'platform' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'sanitize_text_field'),
+            'landing_page' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'esc_url_raw'),
+            'referrer' => array('type' => 'string', 'required' => false, 'sanitize_callback' => 'esc_url_raw'),
+            'event_name' => array('type' => 'string', 'required' => false, 'default' => 'Lead', 'sanitize_callback' => 'sanitize_text_field'),
+            'custom_data' => array('required' => false),
         );
     }
     

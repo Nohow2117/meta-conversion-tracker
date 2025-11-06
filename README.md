@@ -257,7 +257,11 @@ GPL v2 or later
 
 ## ⭐ Version
 
-**1.0.0** - Initial release
+**1.0.1** - Bug fix release (2025-11-06)
+- Fixed referrer parameter validation error
+- Improved API parameter handling
+
+**1.0.0** - Initial release (2025-11-05)
 
 ---
 

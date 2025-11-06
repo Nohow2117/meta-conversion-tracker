@@ -50,7 +50,7 @@ class MCTTracker {
             
             // Page info
             landing_page: window.location.href,
-            referrer: document.referrer || null,
+            referrer: document.referrer || '',
             
             // User agent
             user_agent: navigator.userAgent,
