@@ -21,6 +21,7 @@ class MCT_Admin {
         add_action('wp_ajax_mct_retry_failed', array($this, 'ajax_retry_failed'));
         add_action('wp_ajax_mct_regenerate_api_key', array($this, 'ajax_regenerate_api_key'));
         add_action('wp_ajax_mct_cleanup_now', array($this, 'ajax_cleanup_now'));
+        add_action('wp_ajax_mct_get_conversion_details', array($this, 'ajax_get_conversion_details'));
     }
     
     /**
@@ -289,5 +290,41 @@ class MCT_Admin {
         update_option('mct_api_key', $new_key);
         
         wp_send_json_success(array('api_key' => $new_key));
+    }
+    
+    /**
+     * AJAX: Get conversion details
+     */
+    public function ajax_get_conversion_details() {
+        check_ajax_referer('mct_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+        
+        if (!$id) {
+            wp_send_json_error('Invalid ID');
+        }
+        
+        $conversion = MCT_Database::get_conversion($id);
+        
+        if (!$conversion) {
+            wp_send_json_error('Conversion not found');
+        }
+        
+        // Parse JSON fields
+        if (!empty($conversion['browser_fingerprint'])) {
+            $conversion['browser_fingerprint'] = json_decode($conversion['browser_fingerprint'], true);
+        }
+        if (!empty($conversion['custom_data'])) {
+            $conversion['custom_data'] = json_decode($conversion['custom_data'], true);
+        }
+        if (!empty($conversion['meta_response'])) {
+            $conversion['meta_response'] = json_decode($conversion['meta_response'], true);
+        }
+        
+        wp_send_json_success($conversion);
     }
 }

@@ -2,6 +2,17 @@
 
 All notable changes to Meta Conversion Tracker will be documented in this file.
 
+## [1.0.3] - 2025-11-06
+
+### Fixed
+- **Bug Fix: View conversion details modal**
+  - Added missing AJAX handler `ajax_get_conversion_details()`
+  - Fixed "Request failed" error when clicking "View" button
+  - Modal now correctly displays all conversion data
+  
+  **Files changed:**
+  - `admin/class-mct-admin.php` - Added AJAX handler and registered action
+
 ## [1.0.2] - 2025-11-06
 
 ### Added
