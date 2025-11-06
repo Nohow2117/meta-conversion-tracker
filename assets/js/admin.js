@@ -244,17 +244,17 @@
             
             if (data.browser_fingerprint) {
                 html += '<h3>Browser Fingerprint</h3>';
-                html += '<pre>' + JSON.stringify(JSON.parse(data.browser_fingerprint), null, 2) + '</pre>';
+                html += '<pre>' + JSON.stringify(data.browser_fingerprint, null, 2) + '</pre>';
             }
             
             if (data.custom_data) {
                 html += '<h3>Custom Data</h3>';
-                html += '<pre>' + JSON.stringify(JSON.parse(data.custom_data), null, 2) + '</pre>';
+                html += '<pre>' + JSON.stringify(data.custom_data, null, 2) + '</pre>';
             }
             
             if (data.meta_response) {
                 html += '<h3>Meta Response</h3>';
-                html += '<pre>' + JSON.stringify(JSON.parse(data.meta_response), null, 2) + '</pre>';
+                html += '<pre>' + JSON.stringify(data.meta_response, null, 2) + '</pre>';
             }
             
             return html;

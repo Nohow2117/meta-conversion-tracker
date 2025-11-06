@@ -2,6 +2,17 @@
 
 All notable changes to Meta Conversion Tracker will be documented in this file.
 
+## [1.0.4] - 2025-11-06
+
+### Fixed
+- **Bug Fix: JSON parsing error in conversion details modal**
+  - Removed duplicate `JSON.parse()` calls in `formatConversionDetails()` function
+  - Data is already parsed by backend, no need to parse again in frontend
+  - Fixed "is not valid JSON" error when viewing conversion details
+  
+  **Files changed:**
+  - `assets/js/admin.js` - Removed JSON.parse() from browser_fingerprint, custom_data, and meta_response
+
 ## [1.0.3] - 2025-11-06
 
 ### Fixed

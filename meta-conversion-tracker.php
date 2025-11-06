@@ -3,7 +3,7 @@
  * Plugin Name: Meta Conversion Tracker
  * Plugin URI: https://yoursite.com/meta-conversion-tracker
  * Description: Advanced conversion tracking system for Meta Ads with REST API and direct database access. Captures UTM parameters, FBCLID, user fingerprints and sends events to Meta Conversions API.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author: Your Name
  * Author URI: https://yoursite.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('MCT_VERSION', '1.0.3');
+define('MCT_VERSION', '1.0.4');
 define('MCT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('MCT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('MCT_PLUGIN_BASENAME', plugin_basename(__FILE__));
