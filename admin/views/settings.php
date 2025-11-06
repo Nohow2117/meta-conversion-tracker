@@ -112,6 +112,34 @@ $api_key = get_option('mct_api_key', '');
         </div>
         
         <div class="mct-card">
+            <h2>Data Management</h2>
+            
+            <table class="form-table">
+                <tr>
+                    <th scope="row">Data Retention</th>
+                    <td>
+                        <p><strong>30 days</strong></p>
+                        <p class="description">
+                            Conversions older than 30 days are automatically deleted daily.<br>
+                            Next cleanup: <?php 
+                                $next_cleanup = wp_next_scheduled('mct_daily_cleanup');
+                                echo $next_cleanup ? date('Y-m-d H:i:s', $next_cleanup) : 'Not scheduled';
+                            ?>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Manual Cleanup</th>
+                    <td>
+                        <button type="button" id="mct-cleanup-now" class="button">Clean Old Data Now</button>
+                        <p class="description">Delete all conversions older than 30 days immediately</p>
+                        <div id="mct-cleanup-result" style="margin-top: 10px;"></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="mct-card">
             <h2>General Settings</h2>
             
             <table class="form-table">

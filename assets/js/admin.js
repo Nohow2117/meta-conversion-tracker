@@ -120,6 +120,55 @@
             });
         });
         
+        // Manual cleanup
+        $('#mct-cleanup-now').on('click', function() {
+            const $btn = $(this);
+            const $result = $('#mct-cleanup-result');
+            
+            if (!confirm('Are you sure you want to delete all conversions older than 30 days? This action cannot be undone.')) {
+                return;
+            }
+            
+            $btn.prop('disabled', true).text('Cleaning...');
+            $result.html('');
+            
+            $.ajax({
+                url: mctAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'mct_cleanup_now',
+                    nonce: mctAdmin.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $result.html(
+                            '<div class="notice notice-success inline">' +
+                            '<p><strong>Cleanup completed!</strong><br>' +
+                            'Conversions deleted: ' + response.data.conversions_deleted + '<br>' +
+                            'Logs deleted: ' + response.data.logs_deleted + '</p>' +
+                            '</div>'
+                        );
+                    } else {
+                        $result.html(
+                            '<div class="notice notice-error inline">' +
+                            '<p>Cleanup failed: ' + (response.data || 'Unknown error') + '</p>' +
+                            '</div>'
+                        );
+                    }
+                },
+                error: function() {
+                    $result.html(
+                        '<div class="notice notice-error inline">' +
+                        '<p>Request failed</p>' +
+                        '</div>'
+                    );
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).text('Clean Old Data Now');
+                }
+            });
+        });
+        
         // View conversion details
         $('.mct-view-details').on('click', function() {
             const conversionId = $(this).data('id');

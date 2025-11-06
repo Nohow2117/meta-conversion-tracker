@@ -3,7 +3,7 @@
  * Plugin Name: Meta Conversion Tracker
  * Plugin URI: https://yoursite.com/meta-conversion-tracker
  * Description: Advanced conversion tracking system for Meta Ads with REST API and direct database access. Captures UTM parameters, FBCLID, user fingerprints and sends events to Meta Conversions API.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Your Name
  * Author URI: https://yoursite.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('MCT_VERSION', '1.0.1');
+define('MCT_VERSION', '1.0.2');
 define('MCT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('MCT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('MCT_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -76,6 +76,9 @@ class Meta_Conversion_Tracker {
         
         // Add CORS headers for API
         add_action('rest_api_init', array($this, 'add_cors_headers'));
+        
+        // Schedule automatic data cleanup
+        add_action('mct_daily_cleanup', array('MCT_Database', 'cleanup_old_conversions'));
     }
     
     /**
@@ -85,6 +88,7 @@ class Meta_Conversion_Tracker {
         MCT_Database::create_tables();
         MCT_Database::create_db_user();
         $this->set_default_options();
+        $this->schedule_cleanup();
         flush_rewrite_rules();
     }
     
@@ -92,7 +96,27 @@ class Meta_Conversion_Tracker {
      * Plugin deactivation
      */
     public function deactivate() {
+        $this->unschedule_cleanup();
         flush_rewrite_rules();
+    }
+    
+    /**
+     * Schedule daily cleanup cron job
+     */
+    private function schedule_cleanup() {
+        if (!wp_next_scheduled('mct_daily_cleanup')) {
+            wp_schedule_event(time(), 'daily', 'mct_daily_cleanup');
+        }
+    }
+    
+    /**
+     * Unschedule cleanup cron job
+     */
+    private function unschedule_cleanup() {
+        $timestamp = wp_next_scheduled('mct_daily_cleanup');
+        if ($timestamp) {
+            wp_unschedule_event($timestamp, 'mct_daily_cleanup');
+        }
     }
     
     /**

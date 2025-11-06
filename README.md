@@ -257,6 +257,11 @@ GPL v2 or later
 
 ## ⭐ Version
 
+**1.0.2** - GDPR Compliance (2025-11-06)
+- Automatic data cleanup every 30 days
+- Manual cleanup button in settings
+- GDPR-compliant data retention
+
 **1.0.1** - Bug fix release (2025-11-06)
 - Fixed referrer parameter validation error
 - Improved API parameter handling

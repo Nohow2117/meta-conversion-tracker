@@ -2,6 +2,33 @@
 
 All notable changes to Meta Conversion Tracker will be documented in this file.
 
+## [1.0.2] - 2025-11-06
+
+### Added
+- **Automatic Data Cleanup (GDPR Compliance)**
+  - Conversions older than 30 days are automatically deleted daily
+  - WordPress cron job runs daily to clean old data
+  - Scheduled on plugin activation, unscheduled on deactivation
+  
+- **Manual Data Cleanup**
+  - New "Data Management" section in Settings page
+  - Manual cleanup button to delete old data immediately
+  - Shows next scheduled cleanup time
+  - AJAX-powered with real-time feedback
+  
+  **Files changed:**
+  - `includes/class-mct-database.php` - Added `cleanup_old_conversions()` method and `DATA_RETENTION_DAYS` constant
+  - `meta-conversion-tracker.php` - Added cron job scheduling/unscheduling
+  - `admin/class-mct-admin.php` - Added AJAX handler for manual cleanup
+  - `admin/views/settings.php` - Added Data Management section
+  - `assets/js/admin.js` - Added manual cleanup button handler
+
+### Technical Details
+- Cleanup deletes both conversions and logs older than 30 days
+- Uses WordPress cron system (`wp_schedule_event`)
+- Prepared SQL statements for security
+- Logs cleanup actions for audit trail
+
 ## [1.0.1] - 2025-11-06
 
 ### Fixed

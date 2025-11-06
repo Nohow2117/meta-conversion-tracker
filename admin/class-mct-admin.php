@@ -20,6 +20,7 @@ class MCT_Admin {
         add_action('wp_ajax_mct_test_meta_connection', array($this, 'ajax_test_meta_connection'));
         add_action('wp_ajax_mct_retry_failed', array($this, 'ajax_retry_failed'));
         add_action('wp_ajax_mct_regenerate_api_key', array($this, 'ajax_regenerate_api_key'));
+        add_action('wp_ajax_mct_cleanup_now', array($this, 'ajax_cleanup_now'));
     }
     
     /**
@@ -243,6 +244,20 @@ class MCT_Admin {
         } else {
             wp_send_json_error($result);
         }
+    }
+    
+    /**
+     * AJAX: Manual cleanup
+     */
+    public function ajax_cleanup_now() {
+        check_ajax_referer('mct_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $result = MCT_Database::cleanup_old_conversions();
+        wp_send_json_success($result);
     }
     
     /**

@@ -16,6 +16,11 @@ class MCT_Database {
     const TABLE_NAME = 'meta_conversions';
     
     /**
+     * Data retention period in days
+     */
+    const DATA_RETENTION_DAYS = 30;
+    
+    /**
      * Get full table name with WordPress prefix
      */
     public static function get_table_name() {
@@ -349,6 +354,41 @@ class MCT_Database {
      */
     public static function log_error($message, $context = array()) {
         self::log($message, $context, 'error');
+    }
+    
+    /**
+     * Clean old conversions (older than retention period)
+     */
+    public static function cleanup_old_conversions() {
+        global $wpdb;
+        
+        $table_name = self::get_table_name();
+        $logs_table = $wpdb->prefix . 'meta_conversion_logs';
+        $retention_days = self::DATA_RETENTION_DAYS;
+        
+        // Delete old conversions
+        $deleted_conversions = $wpdb->query($wpdb->prepare(
+            "DELETE FROM $table_name WHERE created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",
+            $retention_days
+        ));
+        
+        // Delete old logs
+        $deleted_logs = $wpdb->query($wpdb->prepare(
+            "DELETE FROM $logs_table WHERE created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",
+            $retention_days
+        ));
+        
+        // Log cleanup action
+        self::log_info('Data cleanup completed', array(
+            'deleted_conversions' => $deleted_conversions,
+            'deleted_logs' => $deleted_logs,
+            'retention_days' => $retention_days
+        ));
+        
+        return array(
+            'conversions_deleted' => $deleted_conversions,
+            'logs_deleted' => $deleted_logs
+        );
     }
     
     /**
