@@ -21,6 +21,7 @@ function sendBeacon(platform, options = {}) {
         timestamp: Date.now(),
         user_agent: navigator.userAgent,
         referrer: document.referrer || 'direct',
+        page_url: window.location.href,
         fingerprint: options.fingerprint || '',
         custom_data: options.custom_data || ''
     };

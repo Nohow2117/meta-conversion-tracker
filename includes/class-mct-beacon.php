@@ -81,6 +81,12 @@ class MCT_Beacon {
                     'type' => 'string',
                     'sanitize_callback' => 'sanitize_text_field',
                     'default' => ''
+                ),
+                'page_url' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'esc_url_raw',
+                    'default' => ''
                 )
             )
         ));
@@ -149,6 +155,7 @@ class MCT_Beacon {
             'timestamp' => $params['timestamp'],
             'user_agent' => !empty($params['user_agent']) ? $params['user_agent'] : $_SERVER['HTTP_USER_AGENT'],
             'referrer' => !empty($params['referrer']) ? $params['referrer'] : 'direct',
+            'page_url' => !empty($params['page_url']) ? $params['page_url'] : '',
             'fingerprint' => !empty($params['fingerprint']) ? $params['fingerprint'] : '',
             'custom_data' => !empty($params['custom_data']) ? $params['custom_data'] : '',
             'ip_address' => $this->get_client_ip(),

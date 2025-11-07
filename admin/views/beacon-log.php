@@ -221,16 +221,17 @@ $actions = $wpdb->get_col("SELECT DISTINCT action FROM {$beacon_table} ORDER BY 
                     <th style="width: 120px;">Date/Time</th>
                     <th style="width: 100px;">Platform</th>
                     <th style="width: 150px;">Action</th>
+                    <th>Page URL</th>
                     <th style="width: 120px;">IP Address</th>
                     <th>Referrer</th>
-                    <th style="width: 150px;">Fingerprint</th>
+                    <th style="width: 100px;">Fingerprint</th>
                     <th style="width: 80px;">Custom</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($beacons)): ?>
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 40px;">
+                        <td colspan="9" style="text-align: center; padding: 40px;">
                             <div style="color: #646970;">
                                 <span class="dashicons dashicons-info" style="font-size: 48px; opacity: 0.3;"></span>
                                 <p style="margin-top: 10px;">No beacons found for the selected filters.</p>
@@ -254,6 +255,15 @@ $actions = $wpdb->get_col("SELECT DISTINCT action FROM {$beacon_table} ORDER BY 
                                 <code style="font-size: 11px; padding: 2px 6px; background: #f0f0f1; border-radius: 3px;">
                                     <?php echo esc_html($beacon->action); ?>
                                 </code>
+                            </td>
+                            <td>
+                                <?php if (!empty($beacon->page_url)): ?>
+                                    <a href="<?php echo esc_url($beacon->page_url); ?>" target="_blank" style="font-size: 12px;">
+                                        <?php echo esc_html(substr($beacon->page_url, 0, 40)) . (strlen($beacon->page_url) > 40 ? '...' : ''); ?>
+                                    </a>
+                                <?php else: ?>
+                                    <span style="color: #dcdcde;">—</span>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <code style="font-size: 11px;"><?php echo esc_html($beacon->ip_address); ?></code>
