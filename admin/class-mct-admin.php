@@ -58,6 +58,15 @@ class MCT_Admin {
         
         add_submenu_page(
             'meta-conversion-tracker',
+            'Beacon Log',
+            'Beacon Log',
+            'manage_options',
+            'mct-beacon-log',
+            array($this, 'render_beacon_log_page')
+        );
+        
+        add_submenu_page(
+            'meta-conversion-tracker',
             'Settings',
             'Settings',
             'manage_options',
@@ -226,6 +235,13 @@ class MCT_Admin {
         $db_info = MCT_Database::get_db_connection_info();
         
         include MCT_PLUGIN_DIR . 'admin/views/database.php';
+    }
+    
+    /**
+     * Render beacon log page
+     */
+    public function render_beacon_log_page() {
+        include MCT_PLUGIN_DIR . 'admin/views/beacon-log.php';
     }
     
     /**

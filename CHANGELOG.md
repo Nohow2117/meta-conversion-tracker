@@ -13,6 +13,12 @@ All notable changes to Meta Conversion Tracker will be documented in this file.
   - Supporta parametri: `action`, `platform`, `timestamp`, `user_agent`, `referrer`, `fingerprint`, `custom_data`
 - **Beacon Stats Endpoint**: `/wp-json/mct/v1/beacon/stats` per ottenere statistiche beacon (richiede admin)
 - **Beacon Compare Endpoint**: `/wp-json/mct/v1/beacon/compare` per confrontare beacon con conversioni e calcolare success rate
+- **Beacon Admin Page**: Nuova pagina "Beacon Log" nel menu admin WordPress
+  - Visualizza tutti i beacon tracciati con filtri per piattaforma, azione, e date
+  - Mostra statistiche aggregate: total beacons, unique IPs, unique fingerprints, success rate
+  - Alert visivo se success rate < 80%
+  - Paginazione e visualizzazione custom data
+  - Tabella con ID, date/time, platform, action, IP, referrer, fingerprint
 - **Tabella Database**: `wp_mct_beacon_log` per memorizzare tutti i beacon
 - **Cleanup Automatico**: I beacon vengono eliminati automaticamente dopo 30 giorni
 - **Documentazione Completa**: 
@@ -26,9 +32,14 @@ All notable changes to Meta Conversion Tracker will be documented in this file.
 
 ### Files Added
 - `includes/class-mct-beacon.php` - Classe principale per gestione beacon
+- `admin/views/beacon-log.php` - Pagina admin per visualizzare beacon log
 - `docs/BEACON-API.md` - Documentazione API completa
 - `docs/BEACON-QUICK-START.md` - Guida rapida
 - `examples/beacon-example.js` - Esempi di utilizzo
+- `BEACON-IMPLEMENTATION-SUMMARY.md` - Riepilogo implementazione
+
+### Files Modified
+- `admin/class-mct-admin.php` - Aggiunto menu "Beacon Log" e metodo render
 
 ## [1.0.4] - 2025-11-06
 
