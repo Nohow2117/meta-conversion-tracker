@@ -100,13 +100,26 @@ sendBeacon('telegram');
 
 ## 📊 Monitoraggio
 
-### Statistiche Beacon
-```bash
-GET https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon/stats
-```
+### 🎨 WordPress Admin Dashboard (CONSIGLIATO)
 
-### Confronto Beacon vs Conversioni
+La via più semplice per visualizzare i beacon:
+
+1. Vai su **WordPress Admin → Conversion Tracker → Beacon Log**
+2. Visualizza:
+   - 📊 Statistiche: Total Beacons, Unique IPs, Unique Fingerprints, Success Rate
+   - 📋 Tabella beacon con tutti i dettagli
+   - 🔍 Filtri per piattaforma, azione, date
+   - ⚠️ Alert automatico se success rate < 80%
+   - 📄 Paginazione (20 per pagina)
+   - 📝 Modal per visualizzare custom data JSON
+
+### 🔌 API Endpoints (Alternativa)
+
 ```bash
+# Statistiche Beacon
+GET https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon/stats
+
+# Confronto Beacon vs Conversioni
 GET https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon/compare
 ```
 

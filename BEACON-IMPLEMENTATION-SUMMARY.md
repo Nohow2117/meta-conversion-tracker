@@ -24,6 +24,20 @@ Implementato con successo l'endpoint **Beacon** per tracking garantito di tutti 
 - ✅ Integrazione cleanup nel cron job giornaliero
 - ✅ Creazione tabella beacon all'attivazione plugin
 
+#### File Creato: `admin/views/beacon-log.php` (372 righe)
+- ✅ Pagina admin WordPress completa per visualizzare beacon
+- ✅ 4 card statistiche: Total Beacons, Unique IPs, Unique Fingerprints, Success Rate
+- ✅ Success rate con calcolo beacon vs conversioni
+- ✅ Alert visivo se success rate < 80%
+- ✅ Filtri: piattaforma, tipo azione, range date
+- ✅ Tabella beacon con paginazione (20 per pagina)
+- ✅ Modal per visualizzare custom data JSON
+- ✅ Badge colorati per piattaforme
+
+#### File Modificato: `admin/class-mct-admin.php`
+- ✅ Aggiunto menu "Beacon Log" in WordPress admin
+- ✅ Metodo `render_beacon_log_page()` per caricare la view
+
 ### 2. Frontend JavaScript
 
 #### File Creato: `examples/beacon-example.js` (277 righe)
@@ -219,11 +233,25 @@ function onTurnstileComplete(token) {
 ```
 
 ### Step 4: Monitora i Risultati
-```bash
-# Via API
-curl "https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon/compare"
 
-# Via SQL
+#### 🎨 Opzione 1: WordPress Admin (CONSIGLIATO)
+```
+WordPress Admin → Conversion Tracker → Beacon Log
+```
+
+Visualizza:
+- 📊 Statistiche aggregate in card
+- 📋 Tabella beacon completa
+- 🔍 Filtri per piattaforma/azione/date
+- ⚠️ Alert automatico se success rate < 80%
+
+#### 🔌 Opzione 2: API REST
+```bash
+curl "https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon/compare"
+```
+
+#### 💾 Opzione 3: Query SQL Dirette
+```sql
 SELECT platform, COUNT(*) as total
 FROM wp_mct_beacon_log
 WHERE DATE(created_at) = CURDATE()

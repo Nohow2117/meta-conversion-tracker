@@ -157,6 +157,90 @@ curl "https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon/compare?start_date
 
 ---
 
+## 🎨 WordPress Admin Dashboard
+
+Il modo più semplice per visualizzare e monitorare i beacon è attraverso la dashboard WordPress.
+
+### Accesso
+
+**WordPress Admin → Conversion Tracker → Beacon Log**
+
+### Funzionalità
+
+#### 📊 Statistiche in Real-Time
+- **Total Beacons**: Numero totale di beacon nel periodo filtrato
+- **Unique IPs**: Numero di IP unici (deduplica utenti)
+- **Unique Fingerprints**: Numero di fingerprint unici (tracking più accurato)
+- **Success Rate**: Percentuale conversioni/beacon
+  - 🟢 Verde se ≥ 80%
+  - 🔴 Rosso se < 80% con alert visivo
+
+#### 🔍 Filtri Avanzati
+- **Platform**: Discord, Telegram, Web, Other
+- **Action Type**: wc_captcha_completed, page_view, custom
+- **Date Range**: From/To date picker
+- Pulsante **Reset** per pulire tutti i filtri
+
+#### 📋 Tabella Beacon
+Colonne visualizzate:
+- **ID**: ID univoco del beacon
+- **Date/Time**: Data e ora del beacon
+- **Platform**: Badge colorato per piattaforma
+  - 🔵 Discord (blu)
+  - 🔷 Telegram (azzurro)
+  - 🟢 Web (verde)
+  - ⚫ Other (grigio)
+- **Action**: Tipo di azione (in code tag)
+- **IP Address**: IP del client
+- **Referrer**: URL di provenienza (link cliccabile)
+- **Fingerprint**: Prime 20 caratteri del fingerprint
+- **Custom Data**: Pulsante "View" per modale JSON
+
+#### 📄 Paginazione
+- 20 beacon per pagina
+- Navigazione prev/next
+- Contatore totale items
+
+#### 📝 Modal Custom Data
+- Click su "View" apre modal
+- JSON formattato e indentato
+- Sintassi highlighting
+- Pulsante Close
+
+#### ⚠️ Alert Automatici
+Se `success_rate < 80%` e ci sono almeno 10 beacon, appare un warning box:
+```
+⚠️ Warning: Success rate is below 80%. 
+This means some beacons are not being converted to tracked conversions. 
+Check your main tracker implementation.
+```
+
+### Screenshot Features
+
+```
+╔═══════════════════════════════════════════════╗
+║ Beacon Log                    [1,234 Total]  ║
+╠═══════════════════════════════════════════════╣
+║                                               ║
+║  [Total Beacons]  [Unique IPs]  [Unique FP]  ║
+║      1,234            987          912        ║
+║                                               ║
+║  [Success Rate: 84.5%] 🟢                     ║
+║  1,287 / 1,523 conversions                    ║
+║                                               ║
+╠═══════════════════════════════════════════════╣
+║  Filters: [Platform ▼] [Action ▼]            ║
+║           [From Date] [To Date]               ║
+║           [Filter] [Reset]                    ║
+╠═══════════════════════════════════════════════╣
+║  ID | Date/Time | Platform | Action | ...    ║
+║  123| 2024-01-15| Discord  | wc_... | ...    ║
+║  122| 2024-01-15| Telegram | wc_... | ...    ║
+╚═══════════════════════════════════════════════╝
+```
+
+---
+
 ## 💻 Implementazione JavaScript
 
 ### Metodo Base (con navigator.sendBeacon)
