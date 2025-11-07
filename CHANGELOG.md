@@ -2,6 +2,34 @@
 
 All notable changes to Meta Conversion Tracker will be documented in this file.
 
+## [1.0.5] - 2025-11-07
+
+### Added
+- **Beacon Endpoint**: Nuovo endpoint `/wp-json/mct/v1/beacon` per tracking garantito di tutti i completamenti captcha
+  - Traccia TUTTI i completamenti captcha, anche se il tracker principale fallisce
+  - Funziona anche in Meta/Instagram/Facebook WebView
+  - Nessuna autenticazione richiesta (endpoint pubblico)
+  - Nessun problema di CORS
+  - Supporta parametri: `action`, `platform`, `timestamp`, `user_agent`, `referrer`, `fingerprint`, `custom_data`
+- **Beacon Stats Endpoint**: `/wp-json/mct/v1/beacon/stats` per ottenere statistiche beacon (richiede admin)
+- **Beacon Compare Endpoint**: `/wp-json/mct/v1/beacon/compare` per confrontare beacon con conversioni e calcolare success rate
+- **Tabella Database**: `wp_mct_beacon_log` per memorizzare tutti i beacon
+- **Cleanup Automatico**: I beacon vengono eliminati automaticamente dopo 30 giorni
+- **Documentazione Completa**: 
+  - `docs/BEACON-API.md` - Documentazione completa API
+  - `docs/BEACON-QUICK-START.md` - Guida rapida
+  - `examples/beacon-example.js` - Esempi di integrazione JavaScript con Turnstile, hCaptcha, reCAPTCHA
+
+### Changed
+- Versione plugin aggiornata a 1.0.5
+- `meta-conversion-tracker.php`: Integrata classe `MCT_Beacon` nel bootstrap del plugin
+
+### Files Added
+- `includes/class-mct-beacon.php` - Classe principale per gestione beacon
+- `docs/BEACON-API.md` - Documentazione API completa
+- `docs/BEACON-QUICK-START.md` - Guida rapida
+- `examples/beacon-example.js` - Esempi di utilizzo
+
 ## [1.0.4] - 2025-11-06
 
 ### Fixed

@@ -3,7 +3,7 @@
  * Plugin Name: Meta Conversion Tracker
  * Plugin URI: https://yoursite.com/meta-conversion-tracker
  * Description: Advanced conversion tracking system for Meta Ads with REST API and direct database access. Captures UTM parameters, FBCLID, user fingerprints and sends events to Meta Conversions API.
- * Version: 1.0.4
+ * Version: 1.0.5
  * Author: Your Name
  * Author URI: https://yoursite.com
  * License: GPL v2 or later
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('MCT_VERSION', '1.0.4');
+define('MCT_VERSION', '1.0.5');
 define('MCT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('MCT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('MCT_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -60,6 +60,7 @@ class Meta_Conversion_Tracker {
         require_once MCT_PLUGIN_DIR . 'includes/class-mct-api.php';
         require_once MCT_PLUGIN_DIR . 'includes/class-mct-meta-api.php';
         require_once MCT_PLUGIN_DIR . 'includes/class-mct-fingerprint.php';
+        require_once MCT_PLUGIN_DIR . 'includes/class-mct-beacon.php';
         require_once MCT_PLUGIN_DIR . 'admin/class-mct-admin.php';
     }
     
@@ -79,6 +80,7 @@ class Meta_Conversion_Tracker {
         
         // Schedule automatic data cleanup
         add_action('mct_daily_cleanup', array('MCT_Database', 'cleanup_old_conversions'));
+        add_action('mct_daily_cleanup', array('MCT_Beacon', 'cleanup_old_beacons'));
     }
     
     /**
@@ -86,6 +88,7 @@ class Meta_Conversion_Tracker {
      */
     public function activate() {
         MCT_Database::create_tables();
+        MCT_Beacon::create_table();
         MCT_Database::create_db_user();
         $this->set_default_options();
         $this->schedule_cleanup();
@@ -146,6 +149,9 @@ class Meta_Conversion_Tracker {
     public function init() {
         // Initialize API
         new MCT_API();
+        
+        // Initialize Beacon
+        new MCT_Beacon();
         
         // Initialize Admin
         if (is_admin()) {
