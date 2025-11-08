@@ -18,13 +18,33 @@ POST https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon
 // STEP 1: Aggiungi questa funzione al tuo codice
 const BEACON_URL = 'https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon';
 
+// Estrae parametri UTM dall'URL
+function getUtmParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        utm_source: params.get('utm_source') || '',
+        utm_medium: params.get('utm_medium') || '',
+        utm_campaign: params.get('utm_campaign') || '',
+        utm_content: params.get('utm_content') || '',
+        utm_term: params.get('utm_term') || ''
+    };
+}
+
 function sendBeacon(platform) {
+    const utmParams = getUtmParams();
+    
     const data = {
         action: 'wc_captcha_completed',
         platform: platform,
         timestamp: Date.now(),
         user_agent: navigator.userAgent,
-        referrer: document.referrer || 'direct'
+        referrer: document.referrer || 'direct',
+        page_url: window.location.href,
+        utm_source: utmParams.utm_source,
+        utm_medium: utmParams.utm_medium,
+        utm_campaign: utmParams.utm_campaign,
+        utm_content: utmParams.utm_content,
+        utm_term: utmParams.utm_term
     };
 
     if (navigator.sendBeacon) {
@@ -56,7 +76,9 @@ sendBeacon('discord');  // o 'telegram', 'web', 'other'
 | `platform` | `discord` / `telegram` / `web` / `other` | La tua piattaforma |
 | `timestamp` | `Date.now()` | Timestamp in millisecondi |
 
-**Parametri opzionali**: `user_agent`, `referrer`, `fingerprint`, `custom_data`
+**Parametri opzionali**: `user_agent`, `referrer`, `page_url`, `fingerprint`, `custom_data`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`
+
+**Note sui parametri UTM**: Vengono estratti automaticamente dall'URL (es. `?utm_source=facebook&utm_campaign=summer2024`) se usi la funzione `getUtmParams()`
 
 ---
 
@@ -107,11 +129,11 @@ La via più semplice per visualizzare i beacon:
 1. Vai su **WordPress Admin → Conversion Tracker → Beacon Log**
 2. Visualizza:
    - 📊 Statistiche: Total Beacons, Unique IPs, Unique Fingerprints, Success Rate
-   - 📋 Tabella beacon con tutti i dettagli
+   - 📋 Tabella beacon con tutti i dettagli (ID, Date/Time, Platform, Country 🇮🇹, Page URL, UTM Campaign, IP Address)
    - 🔍 Filtri per piattaforma, azione, date
    - ⚠️ Alert automatico se success rate < 80%
    - 📄 Paginazione (20 per pagina)
-   - 📝 Modal per visualizzare custom data JSON
+   - 📝 Modal "View Details" con tutte le informazioni complete (country, page_url, tutti i 5 parametri UTM, referrer, fingerprint, custom data)
 
 ### 🔌 API Endpoints (Alternativa)
 
@@ -130,7 +152,7 @@ GET https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon/compare
 ## 🧪 Test Rapido
 
 ```bash
-# Test con curl
+# Test con curl (con parametri UTM)
 curl -X POST https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon \
   -H "Content-Type: application/json" \
   -d '{
@@ -138,7 +160,10 @@ curl -X POST https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon \
     "platform": "discord",
     "timestamp": 1699534567890,
     "user_agent": "Test",
-    "referrer": "direct"
+    "referrer": "direct",
+    "page_url": "https://play.warcry-mmorpg.online/landing",
+    "utm_source": "facebook",
+    "utm_campaign": "test2024"
   }'
 
 # Risposta attesa:

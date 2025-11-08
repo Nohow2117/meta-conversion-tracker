@@ -32,8 +32,14 @@ Nessun header richiesto (endpoint pubblico)
 | `timestamp` | integer | ✅ | Unix timestamp (ms) | Timestamp dell'evento |
 | `user_agent` | string | ❌ | - | User Agent (auto-detect se vuoto) |
 | `referrer` | string | ❌ | URL | URL di provenienza (default: "direct") |
+| `page_url` | string | ❌ | URL | URL della pagina dove è stato completato il captcha |
 | `fingerprint` | string | ❌ | - | Fingerprint del browser |
 | `custom_data` | string | ❌ | JSON string | Dati custom aggiuntivi |
+| `utm_source` | string | ❌ | max 255 chars | Sorgente della campagna (es. facebook, google) |
+| `utm_medium` | string | ❌ | max 255 chars | Mezzo della campagna (es. cpc, email) |
+| `utm_campaign` | string | ❌ | max 255 chars | Nome della campagna |
+| `utm_content` | string | ❌ | max 255 chars | Contenuto dell'annuncio |
+| `utm_term` | string | ❌ | max 255 chars | Parole chiave della campagna |
 
 #### Esempio Request
 
@@ -46,8 +52,14 @@ curl -X POST https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon \
     "timestamp": 1699534567890,
     "user_agent": "Mozilla/5.0...",
     "referrer": "https://discord.com/invite/abc123",
+    "page_url": "https://play.warcry-mmorpg.online/landing",
     "fingerprint": "fp_abc123xyz",
-    "custom_data": "{\"campaign\":\"summer2024\",\"channel\":\"general\"}"
+    "custom_data": "{\"campaign\":\"summer2024\",\"channel\":\"general\"}",
+    "utm_source": "facebook",
+    "utm_medium": "cpc",
+    "utm_campaign": "summer2024",
+    "utm_content": "banner-blue",
+    "utm_term": "mmorpg"
   }'
 ```
 
@@ -190,22 +202,30 @@ Colonne visualizzate:
   - 🔷 Telegram (azzurro)
   - 🟢 Web (verde)
   - ⚫ Other (grigio)
-- **Action**: Tipo di azione (in code tag)
+- **Country**: Paese di provenienza con flag emoji (🇮🇹 IT, 🇺🇸 US, 🌍 others)
+- **Page URL**: URL della pagina (troncato a 40 caratteri, cliccabile)
+- **UTM Campaign**: Nome campagna con badge blu, UTM Source sotto con emoji 📍
 - **IP Address**: IP del client
-- **Referrer**: URL di provenienza (link cliccabile)
-- **Fingerprint**: Prime 20 caratteri del fingerprint
-- **Custom Data**: Pulsante "View" per modale JSON
+- **Details**: Pulsante "View Details" che apre modal con tutte le informazioni
 
 #### 📄 Paginazione
 - 20 beacon per pagina
 - Navigazione prev/next
 - Contatore totale items
 
-#### 📝 Modal Custom Data
-- Click su "View" apre modal
-- JSON formattato e indentato
-- Sintassi highlighting
-- Pulsante Close
+#### 📝 Modal Beacon Details
+- Click su "View Details" apre modal completo
+- Mostra tutti i dati del beacon:
+  - Platform, Action, Timestamp
+  - Country con flag emoji
+  - Page URL completo (cliccabile)
+  - Tutti i 5 parametri UTM (source, medium, campaign, content, term)
+  - IP Address
+  - User Agent
+  - Referrer (cliccabile se presente)
+  - Fingerprint completo
+  - Custom Data (JSON formattato)
+- Pulsante Close per chiudere
 
 #### ⚠️ Alert Automatici
 Se `success_rate < 80%` e ci sono almeno 10 beacon, appare un warning box:
@@ -248,15 +268,35 @@ Check your main tracker implementation.
 ```javascript
 const BEACON_URL = 'https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon';
 
+// Estrae parametri UTM dall'URL
+function getUtmParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        utm_source: params.get('utm_source') || '',
+        utm_medium: params.get('utm_medium') || '',
+        utm_campaign: params.get('utm_campaign') || '',
+        utm_content: params.get('utm_content') || '',
+        utm_term: params.get('utm_term') || ''
+    };
+}
+
 function sendBeacon(platform, options = {}) {
+    const utmParams = getUtmParams();
+    
     const beaconData = {
         action: 'wc_captcha_completed',
         platform: platform,
         timestamp: Date.now(),
         user_agent: navigator.userAgent,
         referrer: document.referrer || 'direct',
+        page_url: window.location.href,
         fingerprint: options.fingerprint || '',
-        custom_data: options.custom_data || ''
+        custom_data: options.custom_data || '',
+        utm_source: utmParams.utm_source,
+        utm_medium: utmParams.utm_medium,
+        utm_campaign: utmParams.utm_campaign,
+        utm_content: utmParams.utm_content,
+        utm_term: utmParams.utm_term
     };
 
     if (navigator.sendBeacon) {
@@ -405,8 +445,15 @@ async function trackWithBeacon(platform) {
 | `timestamp` | bigint(20) | Timestamp evento (ms) |
 | `user_agent` | text | User Agent |
 | `referrer` | text | URL referrer |
+| `page_url` | text | URL della pagina |
+| `country` | varchar(2) | Codice paese ISO (IT, US, etc) |
 | `fingerprint` | varchar(255) | Browser fingerprint |
 | `custom_data` | text | Dati custom JSON |
+| `utm_source` | varchar(255) | Sorgente campagna |
+| `utm_medium` | varchar(255) | Mezzo campagna |
+| `utm_campaign` | varchar(255) | Nome campagna |
+| `utm_content` | varchar(255) | Contenuto annuncio |
+| `utm_term` | varchar(255) | Parole chiave |
 | `ip_address` | varchar(45) | IP del client |
 | `created_at` | datetime | Data creazione record |
 
@@ -416,6 +463,8 @@ async function trackWithBeacon(platform) {
 - `idx_action` su `action`
 - `idx_created_at` su `created_at`
 - `idx_fingerprint` su `fingerprint`
+- `idx_country` su `country`
+- `idx_utm_campaign` su `utm_campaign`
 
 ---
 

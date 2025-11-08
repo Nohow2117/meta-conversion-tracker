@@ -9,12 +9,28 @@
 const BEACON_URL = 'https://play.warcry-mmorpg.online/wp-json/mct/v1/beacon';
 
 /**
+ * Estrae i parametri UTM dall'URL corrente
+ */
+function getUtmParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        utm_source: params.get('utm_source') || '',
+        utm_medium: params.get('utm_medium') || '',
+        utm_campaign: params.get('utm_campaign') || '',
+        utm_content: params.get('utm_content') || '',
+        utm_term: params.get('utm_term') || ''
+    };
+}
+
+/**
  * Invia un beacon quando l'utente completa il captcha
  * 
  * @param {string} platform - 'discord', 'telegram', 'web', o 'other'
  * @param {object} options - Opzioni aggiuntive (fingerprint, custom_data)
  */
 function sendBeacon(platform, options = {}) {
+    const utmParams = getUtmParams();
+    
     const beaconData = {
         action: 'wc_captcha_completed',
         platform: platform,
@@ -23,7 +39,12 @@ function sendBeacon(platform, options = {}) {
         referrer: document.referrer || 'direct',
         page_url: window.location.href,
         fingerprint: options.fingerprint || '',
-        custom_data: options.custom_data || ''
+        custom_data: options.custom_data || '',
+        utm_source: utmParams.utm_source,
+        utm_medium: utmParams.utm_medium,
+        utm_campaign: utmParams.utm_campaign,
+        utm_content: utmParams.utm_content,
+        utm_term: utmParams.utm_term
     };
 
     // Usa navigator.sendBeacon per garantire l'invio anche se la pagina si chiude

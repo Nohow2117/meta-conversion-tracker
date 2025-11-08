@@ -87,6 +87,36 @@ class MCT_Beacon {
                     'type' => 'string',
                     'sanitize_callback' => 'esc_url_raw',
                     'default' => ''
+                ),
+                'utm_source' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'default' => ''
+                ),
+                'utm_medium' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'default' => ''
+                ),
+                'utm_campaign' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'default' => ''
+                ),
+                'utm_content' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'default' => ''
+                ),
+                'utm_term' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                    'default' => ''
                 )
             )
         ));
@@ -149,6 +179,7 @@ class MCT_Beacon {
         $params = $request->get_params();
         
         // Prepara i dati
+        $ip = $this->get_client_ip();
         $data = array(
             'action' => $params['action'],
             'platform' => $params['platform'],
@@ -158,7 +189,13 @@ class MCT_Beacon {
             'page_url' => !empty($params['page_url']) ? $params['page_url'] : '',
             'fingerprint' => !empty($params['fingerprint']) ? $params['fingerprint'] : '',
             'custom_data' => !empty($params['custom_data']) ? $params['custom_data'] : '',
-            'ip_address' => $this->get_client_ip(),
+            'ip_address' => $ip,
+            'country' => $this->get_country_from_ip($ip),
+            'utm_source' => !empty($params['utm_source']) ? $params['utm_source'] : '',
+            'utm_medium' => !empty($params['utm_medium']) ? $params['utm_medium'] : '',
+            'utm_campaign' => !empty($params['utm_campaign']) ? $params['utm_campaign'] : '',
+            'utm_content' => !empty($params['utm_content']) ? $params['utm_content'] : '',
+            'utm_term' => !empty($params['utm_term']) ? $params['utm_term'] : '',
             'created_at' => current_time('mysql')
         );
         
@@ -344,6 +381,44 @@ class MCT_Beacon {
     }
     
     /**
+     * Ottieni paese (ISO code) dall'IP
+     * Usa Cloudflare header se disponibile, altrimenti API gratuita
+     */
+    private function get_country_from_ip($ip) {
+        // Se IP non valido
+        if (empty($ip) || $ip === 'unknown') {
+            return '';
+        }
+        
+        // Cloudflare fornisce il paese nell'header
+        if (!empty($_SERVER['HTTP_CF_IPCOUNTRY'])) {
+            return strtoupper($_SERVER['HTTP_CF_IPCOUNTRY']);
+        }
+        
+        // Fallback: usa API gratuita ip-api.com (max 45 req/min)
+        $country_code = get_transient('mct_geoip_' . md5($ip));
+        
+        if ($country_code === false) {
+            $response = wp_remote_get('http://ip-api.com/json/' . $ip . '?fields=countryCode', array(
+                'timeout' => 2,
+                'sslverify' => false
+            ));
+            
+            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                $body = json_decode(wp_remote_retrieve_body($response), true);
+                $country_code = !empty($body['countryCode']) ? $body['countryCode'] : '';
+                
+                // Cache per 24 ore
+                set_transient('mct_geoip_' . md5($ip), $country_code, DAY_IN_SECONDS);
+            } else {
+                $country_code = '';
+            }
+        }
+        
+        return $country_code;
+    }
+    
+    /**
      * Crea la tabella beacon log
      */
     public static function create_table() {
@@ -359,15 +434,24 @@ class MCT_Beacon {
             timestamp bigint(20) NOT NULL,
             user_agent text NOT NULL,
             referrer text,
+            page_url text,
             fingerprint varchar(255),
             custom_data text,
             ip_address varchar(45),
+            country varchar(2),
+            utm_source varchar(255),
+            utm_medium varchar(255),
+            utm_campaign varchar(255),
+            utm_content varchar(255),
+            utm_term varchar(255),
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY idx_platform (platform),
             KEY idx_action (action),
             KEY idx_created_at (created_at),
-            KEY idx_fingerprint (fingerprint)
+            KEY idx_fingerprint (fingerprint),
+            KEY idx_country (country),
+            KEY idx_utm_campaign (utm_campaign)
         ) {$charset_collate};";
         
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');

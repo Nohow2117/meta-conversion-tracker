@@ -218,20 +218,19 @@ $actions = $wpdb->get_col("SELECT DISTINCT action FROM {$beacon_table} ORDER BY 
             <thead>
                 <tr>
                     <th style="width: 50px;">ID</th>
-                    <th style="width: 120px;">Date/Time</th>
-                    <th style="width: 100px;">Platform</th>
-                    <th style="width: 150px;">Action</th>
+                    <th style="width: 110px;">Date/Time</th>
+                    <th style="width: 90px;">Platform</th>
+                    <th style="width: 50px;">Country</th>
                     <th>Page URL</th>
-                    <th style="width: 120px;">IP Address</th>
-                    <th>Referrer</th>
-                    <th style="width: 100px;">Fingerprint</th>
-                    <th style="width: 80px;">Custom</th>
+                    <th style="width: 150px;">UTM Campaign</th>
+                    <th style="width: 100px;">IP Address</th>
+                    <th style="width: 80px;">Details</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($beacons)): ?>
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 40px;">
+                        <td colspan="8" style="text-align: center; padding: 40px;">
                             <div style="color: #646970;">
                                 <span class="dashicons dashicons-info" style="font-size: 48px; opacity: 0.3;"></span>
                                 <p style="margin-top: 10px;">No beacons found for the selected filters.</p>
@@ -251,10 +250,15 @@ $actions = $wpdb->get_col("SELECT DISTINCT action FROM {$beacon_table} ORDER BY 
                                     <?php echo esc_html(ucfirst($beacon->platform)); ?>
                                 </span>
                             </td>
-                            <td>
-                                <code style="font-size: 11px; padding: 2px 6px; background: #f0f0f1; border-radius: 3px;">
-                                    <?php echo esc_html($beacon->action); ?>
-                                </code>
+                            <td style="text-align: center;">
+                                <?php if (!empty($beacon->country)): ?>
+                                    <span title="<?php echo esc_attr($beacon->country); ?>" style="font-size: 20px;">
+                                        <?php echo $beacon->country === 'IT' ? '🇮🇹' : ($beacon->country === 'US' ? '🇺🇸' : '🌍'); ?>
+                                    </span>
+                                    <small style="display: block; font-size: 10px; color: #646970;"><?php echo esc_html($beacon->country); ?></small>
+                                <?php else: ?>
+                                    <span style="color: #dcdcde;">—</span>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php if (!empty($beacon->page_url)): ?>
@@ -266,32 +270,34 @@ $actions = $wpdb->get_col("SELECT DISTINCT action FROM {$beacon_table} ORDER BY 
                                 <?php endif; ?>
                             </td>
                             <td>
+                                <?php if (!empty($beacon->utm_campaign)): ?>
+                                    <code style="font-size: 11px; padding: 2px 6px; background: #e7f5ff; border-radius: 3px; color: #0066cc;">
+                                        <?php echo esc_html($beacon->utm_campaign); ?>
+                                    </code>
+                                    <?php if (!empty($beacon->utm_source)): ?>
+                                        <br><small style="color: #646970; font-size: 10px;">📍 <?php echo esc_html($beacon->utm_source); ?></small>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <span style="color: #dcdcde;">—</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
                                 <code style="font-size: 11px;"><?php echo esc_html($beacon->ip_address); ?></code>
                             </td>
                             <td>
-                                <?php if ($beacon->referrer && $beacon->referrer !== 'direct'): ?>
-                                    <a href="<?php echo esc_url($beacon->referrer); ?>" target="_blank" style="font-size: 12px;">
-                                        <?php echo esc_html(substr($beacon->referrer, 0, 50)) . (strlen($beacon->referrer) > 50 ? '...' : ''); ?>
-                                    </a>
-                                <?php else: ?>
-                                    <span style="color: #646970; font-size: 12px;">Direct</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($beacon->fingerprint): ?>
-                                    <code style="font-size: 10px;"><?php echo esc_html(substr($beacon->fingerprint, 0, 20)); ?></code>
-                                <?php else: ?>
-                                    <span style="color: #dcdcde;">—</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($beacon->custom_data): ?>
-                                    <button type="button" class="button button-small view-custom-data" data-custom="<?php echo esc_attr($beacon->custom_data); ?>">
-                                        View
-                                    </button>
-                                <?php else: ?>
-                                    <span style="color: #dcdcde;">—</span>
-                                <?php endif; ?>
+                                <button type="button" class="button button-small view-beacon-details" 
+                                    data-id="<?php echo $beacon->id; ?>"
+                                    data-action="<?php echo esc_attr($beacon->action); ?>"
+                                    data-referrer="<?php echo esc_attr($beacon->referrer); ?>"
+                                    data-fingerprint="<?php echo esc_attr($beacon->fingerprint); ?>"
+                                    data-utm-source="<?php echo esc_attr($beacon->utm_source ?? ''); ?>"
+                                    data-utm-medium="<?php echo esc_attr($beacon->utm_medium ?? ''); ?>"
+                                    data-utm-campaign="<?php echo esc_attr($beacon->utm_campaign ?? ''); ?>"
+                                    data-utm-content="<?php echo esc_attr($beacon->utm_content ?? ''); ?>"
+                                    data-utm-term="<?php echo esc_attr($beacon->utm_term ?? ''); ?>"
+                                    data-custom="<?php echo esc_attr($beacon->custom_data); ?>">
+                                    View
+                                </button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -347,29 +353,91 @@ $actions = $wpdb->get_col("SELECT DISTINCT action FROM {$beacon_table} ORDER BY 
     </div>
 </div>
 
-<!-- Custom Data Modal -->
-<div id="custom-data-modal" style="display: none;">
+<!-- Beacon Details Modal -->
+<div id="beacon-details-modal" style="display: none;">
     <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 100000; display: flex; align-items: center; justify-content: center;" onclick="this.parentElement.style.display='none'">
-        <div style="background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 80vh; overflow: auto;" onclick="event.stopPropagation()">
-            <h2 style="margin-top: 0;">Custom Data</h2>
-            <pre id="custom-data-content" style="background: #f0f0f1; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 12px;"></pre>
-            <button type="button" class="button" onclick="document.getElementById('custom-data-modal').style.display='none'">Close</button>
+        <div style="background: white; padding: 30px; border-radius: 8px; max-width: 700px; width: 90%; max-height: 80vh; overflow: auto;" onclick="event.stopPropagation()">
+            <h2 style="margin-top: 0;">📡 Beacon Details #<span id="beacon-id"></span></h2>
+            
+            <div style="display: grid; gap: 15px;">
+                <div style="border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                    <strong style="display: block; color: #646970; font-size: 12px; margin-bottom: 5px;">Action</strong>
+                    <code id="beacon-action" style="font-size: 13px; padding: 4px 8px; background: #f0f0f1; border-radius: 3px;"></code>
+                </div>
+                
+                <div style="border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                    <strong style="display: block; color: #646970; font-size: 12px; margin-bottom: 5px;">Referrer</strong>
+                    <div id="beacon-referrer" style="font-size: 13px;"></div>
+                </div>
+                
+                <div style="border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                    <strong style="display: block; color: #646970; font-size: 12px; margin-bottom: 5px;">Fingerprint</strong>
+                    <code id="beacon-fingerprint" style="font-size: 11px; word-break: break-all;"></code>
+                </div>
+                
+                <div style="border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                    <strong style="display: block; color: #646970; font-size: 12px; margin-bottom: 5px;">🎯 UTM Parameters</strong>
+                    <table style="width: 100%; font-size: 12px;">
+                        <tr><td style="padding: 4px 0; color: #646970;">Source:</td><td><strong id="beacon-utm-source"></strong></td></tr>
+                        <tr><td style="padding: 4px 0; color: #646970;">Medium:</td><td><strong id="beacon-utm-medium"></strong></td></tr>
+                        <tr><td style="padding: 4px 0; color: #646970;">Campaign:</td><td><strong id="beacon-utm-campaign"></strong></td></tr>
+                        <tr><td style="padding: 4px 0; color: #646970;">Content:</td><td><strong id="beacon-utm-content"></strong></td></tr>
+                        <tr><td style="padding: 4px 0; color: #646970;">Term:</td><td><strong id="beacon-utm-term"></strong></td></tr>
+                    </table>
+                </div>
+                
+                <div id="beacon-custom-section" style="border-bottom: 1px solid #ddd; padding-bottom: 10px; display: none;">
+                    <strong style="display: block; color: #646970; font-size: 12px; margin-bottom: 5px;">Custom Data</strong>
+                    <pre id="beacon-custom-data" style="background: #f0f0f1; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 11px; margin: 0;"></pre>
+                </div>
+            </div>
+            
+            <button type="button" class="button button-primary" onclick="document.getElementById('beacon-details-modal').style.display='none'" style="margin-top: 15px;">Close</button>
         </div>
     </div>
 </div>
 
 <script>
 jQuery(document).ready(function($) {
-    // View custom data
-    $('.view-custom-data').on('click', function() {
-        var customData = $(this).data('custom');
-        try {
-            var formatted = JSON.stringify(JSON.parse(customData), null, 2);
-            $('#custom-data-content').text(formatted);
-        } catch(e) {
-            $('#custom-data-content').text(customData);
+    // View beacon details
+    $('.view-beacon-details').on('click', function() {
+        var $btn = $(this);
+        
+        // Populate modal
+        $('#beacon-id').text($btn.data('id'));
+        $('#beacon-action').text($btn.data('action') || '—');
+        
+        var referrer = $btn.data('referrer');
+        if (referrer && referrer !== 'direct') {
+            $('#beacon-referrer').html('<a href="' + referrer + '" target="_blank">' + referrer + '</a>');
+        } else {
+            $('#beacon-referrer').text('Direct');
         }
-        $('#custom-data-modal').show();
+        
+        $('#beacon-fingerprint').text($btn.data('fingerprint') || '—');
+        
+        // UTM Parameters
+        $('#beacon-utm-source').text($btn.data('utm-source') || '—');
+        $('#beacon-utm-medium').text($btn.data('utm-medium') || '—');
+        $('#beacon-utm-campaign').text($btn.data('utm-campaign') || '—');
+        $('#beacon-utm-content').text($btn.data('utm-content') || '—');
+        $('#beacon-utm-term').text($btn.data('utm-term') || '—');
+        
+        // Custom data
+        var customData = $btn.data('custom');
+        if (customData) {
+            try {
+                var formatted = JSON.stringify(JSON.parse(customData), null, 2);
+                $('#beacon-custom-data').text(formatted);
+            } catch(e) {
+                $('#beacon-custom-data').text(customData);
+            }
+            $('#beacon-custom-section').show();
+        } else {
+            $('#beacon-custom-section').hide();
+        }
+        
+        $('#beacon-details-modal').show();
     });
 });
 </script>
